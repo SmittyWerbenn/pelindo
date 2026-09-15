@@ -21,6 +21,12 @@ export interface AsetFormValues {
   catatan?: string;
 }
 
+export interface SurveyValues {
+  kondisi: string;
+  status: Aset["status"];
+  catatan: string;
+}
+
 const penggunaanDefault: Record<Aset["status"], string> = {
   "Aktif Digunakan": "Digunakan aktif oleh instansi terkait",
   Idle: "Belum dimanfaatkan",
@@ -39,7 +45,7 @@ interface AssetContextValue {
   addAsset: (values: AsetFormValues, pengguna: string) => void;
   updateAsset: (kode: string, values: AsetFormValues, pengguna: string) => void;
   removeAsset: (kode: string) => void;
-  verifyBapenda: (kode: string) => void;
+  recordSurvey: (kode: string, values: SurveyValues, pengguna: string) => void;
 }
 
 const AssetContext = createContext<AssetContextValue | undefined>(undefined);
@@ -140,18 +146,34 @@ export function AssetProvider({ children }: { children: ReactNode }) {
     setAssets((prev) => prev.filter((a) => a.kode !== kode));
   };
 
-  const verifyBapenda = (kode: string) => {
+  const recordSurvey = (kode: string, values: SurveyValues, pengguna: string) => {
     setAssets((prev) =>
-      prev.map((a) =>
-        a.kode === kode
-          ? { ...a, bapenda: { ...a.bapenda, statusVerifikasi: "Terverifikasi", terakhirCrossCheck: todayIso() } }
-          : a
-      )
+      prev.map((a) => {
+        if (a.kode !== kode) return a;
+
+        const statusChanged = a.status !== values.status;
+        const catatanTrim = values.catatan.trim();
+        const riwayatBaru: RiwayatEntry = {
+          tahun: Number(todayIso().slice(0, 4)),
+          tanggal: todayIso(),
+          judul: "Survey Lapangan",
+          keterangan: `Kondisi aset: ${values.kondisi}.${catatanTrim ? ` ${catatanTrim}` : ""}`,
+          ...(statusChanged ? { statusSebelum: a.status, statusSesudah: values.status } : {}),
+          pengguna,
+        };
+
+        return {
+          ...a,
+          status: values.status,
+          penggunaan: statusChanged ? penggunaanDefault[values.status] : a.penggunaan,
+          riwayat: [riwayatBaru, ...a.riwayat],
+        };
+      })
     );
   };
 
   return (
-    <AssetContext.Provider value={{ assets, getAsset, addAsset, updateAsset, removeAsset, verifyBapenda }}>
+    <AssetContext.Provider value={{ assets, getAsset, addAsset, updateAsset, removeAsset, recordSurvey }}>
       {children}
     </AssetContext.Provider>
   );

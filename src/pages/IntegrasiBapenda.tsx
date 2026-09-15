@@ -3,34 +3,22 @@ import { CheckCheck, RefreshCw, XCircle, Landmark } from "lucide-react";
 import { PageHeader } from "../components/ui/PageHeader";
 import { KPICard } from "../components/ui/KPICard";
 import { StatusBapendaBadge } from "../components/ui/StatusBadge";
-import { Toast } from "../components/ui/Toast";
-import { useToast } from "../components/ui/useToast";
-import { useAuth } from "../context/AuthContext";
 import { useAssets } from "../context/AssetContext";
-import { rolePermissions } from "../lib/permissions";
 import { formatRupiahFull, formatTanggal } from "../lib/format";
 
 export default function IntegrasiBapenda() {
   const navigate = useNavigate();
-  const { role } = useAuth();
-  const { assets, verifyBapenda } = useAssets();
-  const canVerify = role ? rolePermissions[role].canVerifyBapenda : false;
-  const { toastMessage, showToast } = useToast();
+  const { assets } = useAssets();
 
   const terverifikasi = assets.filter((a) => a.bapenda.statusVerifikasi === "Terverifikasi").length;
   const perluCheck = assets.filter((a) => a.bapenda.statusVerifikasi === "Perlu Cross Check").length;
   const tidakSesuai = assets.filter((a) => a.bapenda.statusVerifikasi === "Tidak Sesuai").length;
 
-  const handleVerifikasi = (kode: string) => {
-    verifyBapenda(kode);
-    showToast(`${kode} ditandai Terverifikasi oleh Bapenda.`);
-  };
-
   return (
     <div>
       <PageHeader
         title="Integrasi Bapenda"
-        subtitle="Status keselarasan data aset dengan basis data pajak Bapenda (NOP & NJOP)."
+        subtitle="Status keselarasan data aset dengan basis data pajak Bapenda (NOP & NJOP). Data ini disinkronkan dari sistem Bapenda."
       />
 
       <div className="space-y-5 p-4 lg:p-6">
@@ -46,7 +34,7 @@ export default function IntegrasiBapenda() {
             <h3 className="text-sm font-semibold text-gray-800">Rincian Cross Check per Aset</h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[940px] text-sm">
+            <table className="w-full min-w-[860px] text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-surface text-left text-xs font-medium uppercase tracking-wide text-gray-400">
                   <th className="px-4 py-3">Kode Aset</th>
@@ -55,7 +43,6 @@ export default function IntegrasiBapenda() {
                   <th className="px-4 py-3">Status Pajak</th>
                   <th className="px-4 py-3">Status Verifikasi</th>
                   <th className="px-4 py-3">Terakhir Cross Check</th>
-                  {canVerify && <th className="px-4 py-3 text-center">Aksi</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -73,20 +60,6 @@ export default function IntegrasiBapenda() {
                       <StatusBapendaBadge status={a.bapenda.statusVerifikasi} size="sm" />
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-gray-500">{formatTanggal(a.bapenda.terakhirCrossCheck)}</td>
-                    {canVerify && (
-                      <td className="whitespace-nowrap px-4 py-3 text-center">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleVerifikasi(a.kode);
-                          }}
-                          disabled={a.bapenda.statusVerifikasi === "Terverifikasi"}
-                          className="rounded-md border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-primary-50 hover:text-primary-700 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-gray-600"
-                        >
-                          Verifikasi
-                        </button>
-                      </td>
-                    )}
                   </tr>
                 ))}
               </tbody>
@@ -94,8 +67,6 @@ export default function IntegrasiBapenda() {
           </div>
         </div>
       </div>
-
-      <Toast message={toastMessage} />
     </div>
   );
 }

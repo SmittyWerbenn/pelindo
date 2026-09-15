@@ -11,7 +11,6 @@ interface AuthState {
 const roleNames: Record<Role, string> = {
   "Admin Aset": "Budi Santoso",
   "Petugas Lapangan": "Rian Pratama",
-  Bapenda: "Siti Nuraini",
   Pimpinan: "Dr. Hendra Wijaya",
   Auditor: "Maya Kusuma",
 };

@@ -63,6 +63,5 @@ export interface Aset {
 export type Role =
   | "Admin Aset"
   | "Petugas Lapangan"
-  | "Bapenda"
   | "Pimpinan"
   | "Auditor";

@@ -3,6 +3,7 @@ import { MapPin, Camera, X, WifiOff, RefreshCw, Locate, CircleCheck } from "luci
 import { PageHeader } from "../../components/ui/PageHeader";
 import { StatusAsetBadge } from "../../components/ui/StatusBadge";
 import { useAssets } from "../../context/AssetContext";
+import { useAuth } from "../../context/AuthContext";
 import type { StatusAset } from "../../types";
 
 const kondisiOptions = ["Baik", "Rusak Ringan", "Rusak Berat"];
@@ -16,10 +17,11 @@ interface QueueItem {
 }
 
 export default function SurveyLapangan() {
-  const { assets } = useAssets();
+  const { assets, recordSurvey } = useAssets();
+  const { nama } = useAuth();
   const [kodeAset, setKodeAset] = useState(assets[0].kode);
   const [kondisi, setKondisi] = useState(kondisiOptions[0]);
-  const [statusAset, setStatusAset] = useState<StatusAset>("Aktif Digunakan");
+  const [statusAset, setStatusAset] = useState<StatusAset>(assets[0].status);
   const [catatan, setCatatan] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
   const [queue, setQueue] = useState<QueueItem[]>([
@@ -43,6 +45,7 @@ export default function SurveyLapangan() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    recordSurvey(kodeAset, { kondisi, status: statusAset, catatan }, nama);
     setQueue((prev) => [
       { id: Date.now(), kode: kodeAset, waktu: "Baru saja", synced: false },
       ...prev,
@@ -75,7 +78,12 @@ export default function SurveyLapangan() {
           <label className="mb-1.5 block text-xs font-medium text-gray-500">Pilih Aset</label>
           <select
             value={kodeAset}
-            onChange={(e) => setKodeAset(e.target.value)}
+            onChange={(e) => {
+              const next = e.target.value;
+              setKodeAset(next);
+              const nextAsset = assets.find((a) => a.kode === next);
+              if (nextAsset) setStatusAset(nextAsset.status);
+            }}
             className="w-full rounded-md border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-800 outline-none focus:border-primary-400"
           >
             {assets.map((a) => (

@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { rolePermissions } from "../lib/permissions";
 import type { Role } from "../types";
 
-const roles: Role[] = ["Admin Aset", "Petugas Lapangan", "Bapenda", "Pimpinan", "Auditor"];
+const roles: Role[] = ["Admin Aset", "Petugas Lapangan", "Pimpinan", "Auditor"];
 
 export default function Login() {
   const [role, setRole] = useState<Role>("Admin Aset");
