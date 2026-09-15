@@ -15,6 +15,7 @@ import { KPICard } from "../components/ui/KPICard";
 import { SectionCard } from "../components/ui/SectionCard";
 import { AssetMap } from "../components/map/AssetMap";
 import { MapLegend } from "../components/map/MapLegend";
+import { AlurProses } from "../components/dashboard/AlurProses";
 import { useAssets } from "../context/AssetContext";
 import { kpiUtama, statusChartData, bapendaMonitoring } from "../data/dashboard";
 import { aktivitasTerbaru } from "../data/activities";
@@ -83,6 +84,10 @@ export default function Dashboard() {
           <KPICard label="Aset Bermasalah" value={formatNumber(kpiUtama.bermasalah)} icon={TriangleAlert} tone="red" />
           <KPICard label="Belum Diverifikasi" value={formatNumber(kpiUtama.belumVerifikasi)} icon={CircleHelp} tone="gray" />
         </div>
+
+        <SectionCard title="Alur Proses Aset">
+          <AlurProses />
+        </SectionCard>
 
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
           {/* Left: Map + Chart */}
